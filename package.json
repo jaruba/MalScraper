@@ -2,12 +2,13 @@
   "name": "mal-scraper",
   "version": "2.2.2",
   "description": "Scrap everything you can from MyAnimeList.net",
-  "main": "src/index.js",
+  "main": "built/index.js",
   "scripts": {
     "test": "npm run lint && nyc ava --verbose --serial test",
     "lint": "standard --fix | snazzy",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-    "cloc": "cloc $(git ls-files)"
+    "cloc": "cloc $(git ls-files)",
+    "build": "babel --presets env src --out-dir built"
   },
   "author": "Kylart",
   "license": "MIT",
@@ -31,7 +32,10 @@
     "lodash": "^4.17.4",
     "match-sorter": "^2.0.2",
     "request": "^2.83.0",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.19",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
   },
   "devDependencies": {
     "ava": "^0.23.0",
@@ -47,6 +51,14 @@
     "exclude": [
       "test",
       "src/officialApi"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
     ]
   }
 }
