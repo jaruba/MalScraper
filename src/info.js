@@ -9,10 +9,17 @@ const getFromBorder = ($, t) => {
 }
 
 const parseCharacterOrStaff = (tr, isStaff = false) => {
+
+  var img = tr.find('img').attr('data-srcset');
+
+  if (img && img.includes(' '))
+      img = img.substr(0, img.indexOf(' '))
+
   return JSON.parse(JSON.stringify({
     link: tr.find('td:nth-child(1)').find('a').attr('href'),
     name: tr.find('td:nth-child(2)').text().trim().split('\n')[0],
     role: tr.find('td:nth-child(2)').text().trim().split('\n')[2].trim(),
+    thumbnail: img,
     seiyuu: !isStaff ? {
       link: tr.find('td:nth-child(3)').find('a').attr('href'),
       name: tr.find('td:nth-child(3)').find('a').text().trim()

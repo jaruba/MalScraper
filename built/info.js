@@ -15,10 +15,16 @@ var getFromBorder = function getFromBorder($, t) {
 var parseCharacterOrStaff = function parseCharacterOrStaff(tr) {
   var isStaff = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
+
+  var img = tr.find('img').attr('data-srcset');
+
+  if (img && img.includes(' ')) img = img.substr(0, img.indexOf(' '));
+
   return JSON.parse(JSON.stringify({
     link: tr.find('td:nth-child(1)').find('a').attr('href'),
     name: tr.find('td:nth-child(2)').text().trim().split('\n')[0],
     role: tr.find('td:nth-child(2)').text().trim().split('\n')[2].trim(),
+    thumbnail: img,
     seiyuu: !isStaff ? {
       link: tr.find('td:nth-child(3)').find('a').attr('href'),
       name: tr.find('td:nth-child(3)').find('a').text().trim()
