@@ -32,6 +32,41 @@ var parseCharacterOrStaff = function parseCharacterOrStaff(tr) {
   }));
 };
 
+var getReviews = function getReviews($) {
+  var reviews = [];
+  $('.borderDark').each(function () {
+    var rvw = $(this).find('.textReadability');
+    var continueRvw = rvw.find('span');
+    continueRvw.find('div').remove();
+    continueRvw = continueRvw.text();
+    rvw.find('span').remove();
+    rvw.find('table').remove();
+    rvw.find('a').remove();
+    rvw = rvw.text().trim();
+
+    var topPart = $(this).find('.spaceit').first();
+
+    var topLeft = $(topPart.children('div')[1]).find('a').first();
+
+    var thumbnail = topLeft.find('img').attr('data-src');
+
+    var name = topLeft.attr('href');
+
+    name = name.substr(name.indexOf('/profile/')).replace('/profile/', '');
+
+    var topRight = $(topPart.children('div')[0]);
+
+    var rating = $(topRight.children('div')[2]);
+    rating.find('a').remove();
+    rating = parseInt(rating.text().replace(':', '').trim());
+
+    reviews.push({
+      name: name, thumbnail: thumbnail, rating: rating, review: rvw, continue: continueRvw
+    });
+  });
+  return reviews;
+};
+
 var getCharactersAndStaff = function getCharactersAndStaff($) {
   var results = {
     characters: [],
@@ -83,6 +118,8 @@ var parsePage = function parsePage(data) {
   var staffAndCharacters = getCharactersAndStaff($);
   result.characters = staffAndCharacters.characters;
   result.staff = staffAndCharacters.staff;
+
+  result.reviews = getReviews($);
 
   result.trailer = $('a.iframe.js-fancybox-video.video-unit.promotion').attr('href');
 
