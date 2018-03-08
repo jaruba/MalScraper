@@ -32,6 +32,29 @@ var parseCharacterOrStaff = function parseCharacterOrStaff(tr) {
   }));
 };
 
+var getSimilar = function getSimilar($) {
+  var similar = [];
+  $('#anime_recommendation .anime-slide .btn-anime').each(function () {
+    var link = $(this).find('.link');
+    if (link && link.length) {
+      var link = link.attr('href');
+      if (link && link.includes('/')) {
+        var parts = link.split('/');
+        if (parts && parts.length) {
+          var idParts = parts[parts.length - 1];
+          if (idParts && idParts.includes('-')) {
+            idParts = idParts.split('-');
+            if (idParts && idParts.length == 2) {
+              similar.push(parseInt(idParts[0] == 1735 ? idParts[1] : idParts[0]));
+            }
+          }
+        }
+      }
+    }
+  });
+  return similar;
+};
+
 var getReviews = function getReviews($) {
   var reviews = [];
   $('.borderDark').each(function () {
@@ -50,8 +73,9 @@ var getReviews = function getReviews($) {
 
     var thumbnail = topLeft.find('img').attr('data-src');
 
-    var name = topLeft.attr('href');
+    if (!topLeft.length) return;
 
+    var name = topLeft.attr('href');
     name = name.substr(name.indexOf('/profile/')).replace('/profile/', '');
 
     var topRight = $(topPart.children('div')[0]);
@@ -107,7 +131,7 @@ var getCharactersAndStaff = function getCharactersAndStaff($) {
   return results;
 };
 
-var parsePage = function parsePage(data) {
+var parsePage = function parsePage(data, malId) {
   var $ = cheerio.load(data);
   var result = {};
 
@@ -120,6 +144,8 @@ var parsePage = function parsePage(data) {
   result.staff = staffAndCharacters.staff;
 
   result.reviews = getReviews($);
+
+  result.similar = malId ? getSimilar($, malId) : [];
 
   result.trailer = $('a.iframe.js-fancybox-video.video-unit.promotion').attr('href');
 
@@ -149,7 +175,7 @@ var parsePage = function parsePage(data) {
   return result;
 };
 
-var getInfoFromURL = function getInfoFromURL(url) {
+var getInfoFromURL = function getInfoFromURL(url, malId) {
   return new Promise(function (resolve, reject) {
     if (!url || typeof url !== 'string' || !url.toLocaleLowerCase().includes('myanimelist')) {
       reject(new Error('[Mal-Scraper]: Invalid Url.'));
@@ -158,7 +184,7 @@ var getInfoFromURL = function getInfoFromURL(url) {
     axios.get(url).then(function (_ref) {
       var data = _ref.data;
 
-      var res = parsePage(data);
+      var res = parsePage(data, malId);
       res.id = +url.split('/').splice(-2, 1)[0];
       resolve(res);
     }).catch( /* istanbul ignore next */function (err) {

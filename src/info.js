@@ -27,6 +27,29 @@ const parseCharacterOrStaff = (tr, isStaff = false) => {
   }))
 }
 
+const getSimilar = ($) => {
+  var similar = []
+  $('#anime_recommendation .anime-slide .btn-anime').each(function() {
+    var link = $(this).find('.link')
+    if (link && link.length) {
+      var link = link.attr('href')
+      if (link && link.includes('/')) {
+        var parts = link.split('/')
+        if (parts && parts.length) {
+          var idParts = parts[parts.length-1]
+          if (idParts && idParts.includes('-')) {
+            idParts = idParts.split('-')
+            if (idParts && idParts.length == 2) {
+                similar.push(parseInt(idParts[0] == 1735 ? idParts[1] : idParts[0]))
+            }
+          }
+        }
+      }
+    }
+  })
+  return similar
+}
+
 const getReviews = ($) => {
   var reviews = []
   $('.borderDark').each(function() {
@@ -45,8 +68,9 @@ const getReviews = ($) => {
 
     var thumbnail = topLeft.find('img').attr('data-src')
 
-    var name = topLeft.attr('href')
+    if (!topLeft.length) return
 
+    var name = topLeft.attr('href')
     name = name.substr(name.indexOf('/profile/')).replace('/profile/','')
 
     var topRight = $(topPart.children('div')[0])
@@ -103,7 +127,7 @@ const getCharactersAndStaff = ($) => {
   return results
 }
 
-const parsePage = (data) => {
+const parsePage = (data, malId) => {
   const $ = cheerio.load(data)
   const result = {}
 
@@ -116,6 +140,8 @@ const parsePage = (data) => {
   result.staff = staffAndCharacters.staff
 
   result.reviews = getReviews($)
+
+  result.similar = malId ? getSimilar($, malId) : []
 
   result.trailer = $('a.iframe.js-fancybox-video.video-unit.promotion').attr('href')
 
@@ -145,7 +171,7 @@ const parsePage = (data) => {
   return result
 }
 
-const getInfoFromURL = (url) => {
+const getInfoFromURL = (url, malId) => {
   return new Promise((resolve, reject) => {
     if (!url || typeof url !== 'string' || !url.toLocaleLowerCase().includes('myanimelist')) {
       reject(new Error('[Mal-Scraper]: Invalid Url.'))
@@ -153,7 +179,7 @@ const getInfoFromURL = (url) => {
 
     axios.get(url)
       .then(({data}) => {
-        const res = parsePage(data)
+        const res = parsePage(data, malId)
         res.id = +url.split('/').splice(-2, 1)[0]
         resolve(res)
       })
